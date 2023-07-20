@@ -5,7 +5,6 @@
             [hollow.dom.canvas :refer [maximize-gl-canvas
                                        canvas-resolution]]
             [hollow.webgl.shaders :refer [run-purefrag-shader!]]
-            [hollow.webgl.textures :refer [create-tex]]
             [kudzu.tools :refer [unquotable]]
             [kudzu.core :refer [kudzu->glsl]]))
 
@@ -19,20 +18,16 @@
   (unquotable
    (kudzu-wrapper
     '{:outputs {fragColor vec4}
-      :uniforms {size vec2
-                 tex sampler2D}
+      :uniforms {size vec2}
       :main ((=vec2 pos (/ gl_FragCoord.xy size))
              
-             (= fragColor (-> tex
-                              .rgb
-                              (vec4 1))))})))
+             (= fragColor (vec4 pos 0 1)))})))
 
-(defn render! [{:keys [gl resolution textures] :as state}]
+(defn render! [{:keys [gl resolution] :as state}]
   (run-purefrag-shader! gl
                         render-frag
                         resolution
-                        {"size" resolution
-                         "tex" (first textures)})
+                        {"size" resolution})
   state)
 
 (defn update-sketch! [{:keys [gl] :as state}]
@@ -42,14 +37,7 @@
       render!))
 
 (defn init-sketch! [gl]
-  (let [resolution (canvas-resolution gl)
-        textures (u/gen 2 (create-tex gl
-                                      :f8
-                                      resolution
-                                      {:filter-mode :nearest
-                                       :wrap-mode :repeat}))]
-    {:gl gl
-     :textures textures}))
+  {:gl gl})
 
 (defn init []
   (start-hollow! init-sketch! update-sketch!))
