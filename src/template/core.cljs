@@ -8,39 +8,28 @@
             [kudzu.tools :refer [unquotable]]
             [kudzu.core :refer [kudzu->glsl]]))
 
-(def kudzu-wrapper 
-  (partial kudzu->glsl
-           '{:precision {float highp
-                         int highp
-                         sampler2D highp
-                         usampler2D highp}}))
 (def render-frag
   (unquotable
-   (kudzu-wrapper
-    '{:outputs {fragColor vec4}
+   (kudzu->glsl
+    '{:precision {float highp}
+      :outputs {fragColor vec4}
       :uniforms {size vec2}
-      :main ((=vec2 pos (/ gl_FragCoord.xy size))
-             
-             (= fragColor (vec4 pos 0 1)))})))
+      :main ((= fragColor (vec4 (/ gl_FragCoord.xy
+                                   size)
+                                0
+                                1)))})))
 
-(defn render! [{:keys [gl resolution] :as state}]
-  (run-purefrag-shader! gl
-                        render-frag
-                        resolution
-                        {"size" resolution})
-  state)
-
-(defn update-sketch! [{:keys [gl] :as state}]
+(defn draw-canvas! [gl]
   (maximize-gl-canvas gl)
-  (-> state
-      (assoc :resolution (canvas-resolution gl))
-      render!))
-
-(defn init-sketch! [gl]
-  {:gl gl})
+  (let [resolution (canvas-resolution gl)]
+    (run-purefrag-shader! gl
+                          render-frag
+                          resolution
+                          {"size" resolution})
+    {}))
 
 (defn init []
-  (start-hollow! init-sketch! update-sketch!))
+  (start-hollow! draw-canvas! nil))
 
 (defn ^:dev/after-load restart! []
   (js/document.body.removeChild (.-canvas (hollow-context)))
