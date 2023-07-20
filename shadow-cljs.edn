@@ -7,4 +7,4 @@
                     :asset-path "/js"
                     :compiler-options {:optimizations :simple
                                        :warnings {:infer false}}
-                    :modules {:base {:init-fn clouds.core/pre-init}}}}}
+                    :modules {:base {:init-fn template.core/pre-init}}}}}

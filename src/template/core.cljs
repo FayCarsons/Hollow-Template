@@ -1,4 +1,4 @@
-(ns clouds.core
+(ns template.core
   (:require [hollow.util :as u]
             [hollow.webgl.core :refer [start-hollow!
                                        hollow-context]]
